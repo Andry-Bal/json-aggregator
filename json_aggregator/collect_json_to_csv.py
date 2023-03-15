@@ -54,7 +54,7 @@ def arg_parser():
         argparse.ArgumentParser: ArgumentParser containing arguments for this
         script.
     """
-    parser = argparse.ArgumentParser(prog="Collect JSON files to CSV",
+    parser = argparse.ArgumentParser(usage='%(prog)s [options] root',
                                      description="Write contents of matching JSON files to a CSV file.",
                                      formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('root', help=" String specifying the root directory for searching")

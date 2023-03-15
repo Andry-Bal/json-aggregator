@@ -84,7 +84,7 @@ def arg_parser() -> argparse.ArgumentParser:
         argparse.ArgumentParser: ArgumentParser containing arguments for this
         script.
     """
-    parser = argparse.ArgumentParser(prog="Aggregate JSON files",
+    parser = argparse.ArgumentParser(usage='%(prog)s [options] root',
                                      description="Aggregate values of matching JSON files by key "
                                                  "based on the provided aggregation functions.",
                                      formatter_class=argparse.ArgumentDefaultsHelpFormatter)
@@ -92,7 +92,9 @@ def arg_parser() -> argparse.ArgumentParser:
     parser.add_argument('-p', '--patterns', nargs='+', default=['*.json'],
                         help="Relative to the `root` patterns used by glob to collect matching JSON files")
     parser.add_argument('-f', '--agg_fns', nargs='+', default=['values'], choices=_aggregation_functions.keys(),
-                        help="List of aggregation functions to be applied on collected values")
+                        help="List of aggregation functions to be applied on collected values. "
+                             f"Available aggregation functions: {list(_aggregation_functions.keys())}",
+                        metavar='AGG_FNS')
     parser.add_argument('-m', '--multidir', action='store_true',
                         help="Perform aggregation for each immediate subdirectory of the `root`")
     parser.add_argument('-o', '--out_fname', help="Path where aggregated JSON will be written. If `multidir` option"
