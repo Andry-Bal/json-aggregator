@@ -60,7 +60,8 @@ def arg_parser():
     parser.add_argument('root', help=" String specifying the root directory for searching")
     parser.add_argument('-p', '--patterns', nargs='+', default=['*.json'],
                         help="Relative to the `root` patterns used by glob to collect matching JSON files")
-    parser.add_argument('-o', '--out_fname', default='collected.csv', help="Path where aggregated JSON will be written")
+    parser.add_argument('-o', '--out_fname', default='collected.csv',
+                        help="Path where resulting CSV file will be written")
     parser.add_argument('-d', '--delimiter', default=',', help="A string used to separate fields")
     parser.add_argument('-r', '--restval', default='-', help="If contents of matching JSON files have non-equal keys, "
                                                              "the missing values are filled-in with this value")

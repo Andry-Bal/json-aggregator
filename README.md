@@ -64,8 +64,8 @@ options:
                         Relative to the `root` patterns used by glob to
                         collect matching JSON files (default: ['*.json'])
   -o OUT_FNAME, --out_fname OUT_FNAME
-                        Path where aggregated JSON will be written (default:
-                        collected.csv)
+                        Path where resulting CSV file will be written
+                        (default: collected.csv)
   -d DELIMITER, --delimiter DELIMITER
                         A string used to separate fields (default: ,)
   -r RESTVAL, --restval RESTVAL
