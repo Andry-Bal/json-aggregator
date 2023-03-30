@@ -1,92 +1,8 @@
+import argparse
 import json
-from collections import defaultdict
-from collections.abc import Iterable
-from collections.abc import Mapping, Generator
-from itertools import groupby
+from collections.abc import Iterable, Mapping, Generator
 from pathlib import Path
-from typing import Callable
-
-
-def all_equal(iterable: Iterable):
-    """Return True if all elements are equal, False otherwise."""
-    g = groupby(iterable)
-    return next(g, True) and not next(g, False)
-
-
-def keys_equal(dicts: Iterable[dict]):
-    """Return True if all dictionaries have the same keys, False otherwise."""
-    return all_equal(d.keys() for d in dicts)
-
-
-def merge_dicts(dicts: Iterable[dict]) -> dict:
-    """Merge multiple dictionaries into a single dictionary, with values having
-    same key merged in a list.
-
-    Args:
-        dicts (Iterable[dict]) Iterable of dictionaries to be merged.
-
-    Returns:
-        dict: Merged dictionary.
-
-    Example:
-        >>> dict1 = {'a': 1, 'b': 2}
-        >>> dict2 = {'a': 3, 'c': 4}
-        >>> merge_dicts([dict1, dict2])
-        {'a': [1, 3], 'b': [2], 'c': [4]}
-
-        >>> dict1 = {'a': 1, 'b': 2}
-        >>> dict2 = dict()
-        >>> merge_dicts([dict1, dict2])
-        {'a': [1], 'b': [2]}
-    """
-    merged = defaultdict(list)
-    for d in dicts:
-        for key, value in d.items():
-            merged[key].append(value)
-    return dict(merged)
-
-
-def agg_values_by_key(dicts: list[dict],
-                      agg_fns: dict[str, Callable]) -> dict[..., dict[str, ...]]:
-    """Aggregate values of multiple dictionaries by key based on given
-    aggregation functions.
-
-    Args:
-        dicts (list[dict]): List of dictionaries to be merged and aggregated.
-        agg_fns (dict[str, Callable])): Dictionary of aggregation functions to be
-            applied on the merged values, where keys are the names of the aggregation
-            functions, and values are the corresponding functions.
-
-    Returns:
-        Dictionary with keys from the merged dictionaries, and values as dictionaries
-        containing the results of applying each aggregation function on the values
-        corresponding to the key.
-
-    Examples:
-        >>> dicts = [{'a': 1, 'b': 2, 'c': 3}, {'a': 2, 'b': 3, 'd': 4}]
-        >>> agg_fns = {'sum': sum, 'max': max, 'min': min}
-        >>> agg_values_by_key(dicts, agg_fns) # doctest: +NORMALIZE_WHITESPACE
-        {'a': {'sum': 3, 'max': 2, 'min': 1},
-        'b': {'sum': 5, 'max': 3, 'min': 2},
-        'c': {'sum': 3, 'max': 3, 'min': 3},
-        'd': {'sum': 4, 'max': 4, 'min': 4}}
-
-        >>> dicts = [{'a': 1, 'b': 2, 'c': 3}, {'a': 2, 'b': 3, 'c': 4}]
-        >>> agg_fns = {'avg': lambda x: sum(x) / len(x)}
-        >>> agg_values_by_key(dicts, agg_fns) # doctest: +NORMALIZE_WHITESPACE
-        {'a': {'avg': 1.5},
-        'b': {'avg': 2.5},
-        'c': {'avg': 3.5}}
-
-        >>> dicts = [{'a': 1, 'b': 2, 'c': 3}]
-        >>> agg_fns = {'sum': sum}
-        >>> agg_values_by_key(dicts, agg_fns) # doctest: +NORMALIZE_WHITESPACE
-        {'a': {'sum': 1},
-        'b': {'sum': 2},
-        'c': {'sum': 3}}
-         """
-    return {key: {fn_name: agg_fn(values) for fn_name, agg_fn in agg_fns.items()}
-            for key, values in merge_dicts(dicts).items()}
+from typing import Any
 
 
 def all_keys(dicts: Iterable[dict]) -> set:
@@ -94,9 +10,9 @@ def all_keys(dicts: Iterable[dict]) -> set:
     return {k for d in dicts for k in d.keys()}
 
 
-def flatten_dict_gen(d: Mapping[str, ...],
+def flatten_dict_gen(d: Mapping[str, Any],
                      parent_key: str | None = None,
-                     delimiter: str = '.') -> Generator[tuple[str, ...], None, None]:
+                     delimiter: str = '.') -> Generator[tuple[str, Any], None, None]:
     """Generator that recursively flattens a nested dictionary.
 
         Args:
@@ -130,7 +46,7 @@ def flatten_dict_gen(d: Mapping[str, ...],
             yield new_key, v
 
 
-def flatten_dict(d: Mapping[str, ...], parent_key: str | None = None, delimiter: str = '.') -> dict[str, ...]:
+def flatten_dict(d: Mapping[str, Any], parent_key: str | None = None, delimiter: str = '.') -> dict[str, Any]:
     """Flatten a nested dictionary
 
     Uses a recursive generator. The keys in the returned dictionary are composed
@@ -215,3 +131,74 @@ def read_matching_jsons(root: str | Path,
          contents of a matching JSON file.
      """
     return [read_json(path) for path in multi_pattern_glob(root, patterns)]
+
+
+class KeyValueAction(argparse.Action):
+    """Custom action for argparse that parses command-line arguments in the form
+    of key-value pairs and builds a dictionary.
+
+    Attributes:
+        option_strings (list): A list of command-line option strings which
+            should be associated with this action.
+        dest (str): The name of the attribute to store the resulting dictionary.
+        key_separator (str, optional): String that separates the key and value(s)
+            in each key-value pair. Default is '='.
+        value_separator (str, optional): String that separates multiple values
+            in a single key-value pair. Default is ','.
+        key_choices (list, optional): A list of valid choices for keys.
+            Default is None.
+        value_choices (list, optional): A list of valid choices for values.
+            Default is None.
+    """
+
+    def __init__(self, option_strings, dest,
+                 key_separator: str = '=',
+                 value_separator: str = ',',
+                 key_choices=None,
+                 value_choices=None,
+                 nargs=None,
+                 choices=None,
+                 **kwargs):
+        if choices is not None:
+            raise ValueError("Parameter `choices` not allowed. "
+                             "Use `key_choices` and `value_choices` instead.")
+        if nargs is not None:
+            raise argparse.ArgumentError(self, "Parameter `nargs` not allowed.")
+        self.key_separator = key_separator
+        self.value_separator = value_separator
+        self.key_choices = key_choices
+        self.value_choices = value_choices
+        super().__init__(option_strings, dest, nargs=nargs, choices=choices, **kwargs)
+
+    def __call__(self, parser, namespace, values, option_string=None):
+        items = getattr(namespace, self.dest, None)
+        if items is None:
+            items = {}
+        if self.key_separator in values:
+            key, vals = values.split(self.key_separator, 1)
+            if self.key_choices is not None:
+                self._validate_key(key)
+            vals = vals.split(self.value_separator)
+            if self.value_choices is not None:
+                self._validate_values(vals)
+            value = vals[0] if len(vals) == 1 else vals
+            items[key] = value
+        else:
+            key = values
+            if self.key_choices is not None:
+                self._validate_key(key)
+            items[key] = None
+        setattr(namespace, self.dest, items)
+
+    def _validate_key(self, key):
+        if key not in self.key_choices:
+            msg = f"invalid key choice: '{key}' " \
+                  f"(chose from {', '.join(map(repr, self.key_choices))})."
+            raise argparse.ArgumentError(self, msg)
+
+    def _validate_values(self, values):
+        invalid_values = set(values) - set(self.value_choices)
+        if invalid_values:
+            msg = f"invalid value choice(s): {', '.join(map(repr, invalid_values))} " \
+                  f"(chose from {', '.join(map(repr, self.value_choices))})."
+            raise argparse.ArgumentError(self, msg)
