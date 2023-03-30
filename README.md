@@ -5,7 +5,7 @@ JSON Aggregator provides two Python scripts for aggregating and collecting data 
 ## Aggregate JSON files with `aggregate_json.py`
 
 ```
-usage: aggregate_json.py [options] root
+usage: aggregate_json.py root [options]
 
 Aggregate values of matching JSON files by key based on the provided
 aggregation functions.

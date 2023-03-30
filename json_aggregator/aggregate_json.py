@@ -95,7 +95,7 @@ def arg_parser() -> argparse.ArgumentParser:
         argparse.ArgumentParser: ArgumentParser containing arguments for this
         script.
     """
-    parser = argparse.ArgumentParser(usage='%(prog)s [options] root',
+    parser = argparse.ArgumentParser(usage='%(prog)s root [options]',
                                      description="Aggregate values of matching JSON files by key "
                                                  "based on the provided aggregation functions.",
                                      epilog="Available aggregation functions: "
