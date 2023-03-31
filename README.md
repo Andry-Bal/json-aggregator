@@ -28,7 +28,8 @@ options:
                         Default aggregation functions to use for keys that are
                         not present in `agg_fns`. If not specified, such keys
                         and their corresponding values are dropped and will
-                        not appear in final aggregated JSON. (default: None)
+                        not appear in final aggregated JSON. (default:
+                        ['list'])
   -m, --multidir        Perform aggregation for each immediate subdirectory of
                         the `root` (default: False)
   -o OUT_FNAME, --out_fname OUT_FNAME
@@ -37,7 +38,7 @@ options:
                         to aggregation directory (default: None)
 
 Available aggregation functions: 'count', 'sum', 'list', 'mean', 'median',
-'mode', 'std', 'var', 'min', 'max'.
+'mode', 'std', 'var', 'min', 'max', 'none'.
 ```
 
 ### Custom aggregation functions

@@ -5,7 +5,7 @@ from typing import Any
 
 # Mapping with function names as keys and callable aggregation functions as
 # values. Each aggregation function should take a list of values as input.
-AGG_FNS = Mapping[str, Callable[[list], Any]]
+AGG_FNS = Mapping[str, Callable[[list], Any] | None]
 
 
 def identity(x):
@@ -80,6 +80,9 @@ def agg_values_by_key(dicts: list[dict],
         {'a': {'min': 1, 'max': 3},
         'b': {'min': 2, 'max': 4},
         'c': {'min': 5, 'max': 6}}
+
+        >>> agg_values_by_key([{'a': 1, 'b': 2}, {'a': 3, 'b': 4}], agg_fns={'a': None})
+        {'b': {'list': [2, 4]}}
     """
     if agg_fns is None and default_agg_fns is None:
         raise ValueError("Both agg_fns and default_agg_fns cannot be None at the same time.")
@@ -91,4 +94,3 @@ def agg_values_by_key(dicts: list[dict],
             out_dict[key] = {agg_fn_name: agg_fn(values)
                              for agg_fn_name, agg_fn in key_agg_fns.items()}
     return out_dict
-

@@ -21,8 +21,19 @@ _aggregation_functions: AGG_FNS = MappingProxyType({
     'max': max,
 })
 
+_none_keyword = "none"
 
-def agg_fns_from_names(names: list[str]) -> AGG_FNS:
+
+def _agg_fn_choices():
+    return *_aggregation_functions.keys(), _none_keyword
+
+
+def agg_fns_from_names(names: list[str]) -> AGG_FNS | None:
+    if _none_keyword in names:
+        if len(names) != 1:
+            raise ValueError(f"`{_none_keyword}` cannot be combined with other "
+                             "aggregation functions.")
+        return None
     return {fn_name: _aggregation_functions[fn_name] for fn_name in names}
 
 
@@ -99,17 +110,17 @@ def arg_parser() -> argparse.ArgumentParser:
                                      description="Aggregate values of matching JSON files by key "
                                                  "based on the provided aggregation functions.",
                                      epilog="Available aggregation functions: "
-                                            f"{', '.join(map(repr, _aggregation_functions.keys()))}.",
+                                            f"{', '.join(map(repr, _agg_fn_choices()))}.",
                                      formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('root', help=" String specifying the root directory for searching")
     parser.add_argument('-p', '--patterns', nargs='+', default=['*.json'],
                         help="Relative to the `root` patterns used by glob to collect matching JSON files")
-    parser.add_argument('-a', '--agg_fns', action=KeyValueAction, value_choices=_aggregation_functions.keys(),
+    parser.add_argument('-a', '--agg_fns', action=KeyValueAction, value_choices=_agg_fn_choices(),
                         help="String representing a key-value pair, where key is a JSON key and value "
                              "is one or multiple aggregation functions for the corresponding key's values. "
                              "If not specified, the default functions from `default_agg_fns` are used.",
                         metavar='KEY=AGG_FN,... [KEY=AGG_FN,... ...]')
-    parser.add_argument('-d', '--default_agg_fns', nargs='+', choices=_aggregation_functions.keys(),
+    parser.add_argument('-d', '--default_agg_fns', nargs='+', default=['list'], choices=_agg_fn_choices(),
                         help="Default aggregation functions to use for keys that are not present in `agg_fns`. "
                              "If not specified, such keys and their corresponding values are dropped and will "
                              "not appear in final aggregated JSON.",
