@@ -1,5 +1,4 @@
 import argparse
-import os
 import statistics as st
 import sys
 from pathlib import Path
@@ -99,6 +98,20 @@ def aggregate_json_values_by_key(root: str | Path,
     return agg_values_by_key(json_dicts, agg_fns, default_agg_fns)
 
 
+def run_aggregate_json(root: str | Path,
+                       patterns: list[str],
+                       agg_fns: dict[str, AGG_FNS] | None = None,
+                       default_agg_fns: AGG_FNS | None = DEFAULT_AGG_FNS,
+                       out_fname: str | Path | None = None):
+    root = Path(root)
+    aggregated = aggregate_json_values_by_key(root, patterns, agg_fns, default_agg_fns)
+    if aggregated is not None:
+        if out_fname is not None:
+            write_json(out_fname, aggregated, indent=4, sort_keys=True)
+        else:
+            print(aggregated)
+
+
 def arg_parser() -> argparse.ArgumentParser:
     """Create command-line interface argument parser for this script
 
@@ -125,31 +138,24 @@ def arg_parser() -> argparse.ArgumentParser:
                              "If not specified, such keys and their corresponding values are dropped and will "
                              "not appear in final aggregated JSON.",
                         metavar='AGG_FN')
-    parser.add_argument('-m', '--multidir', action='store_true',
-                        help="Perform aggregation for each immediate subdirectory of the `root`")
-    parser.add_argument('-o', '--out_fname', help="Path where aggregated JSON will be written. If `multidir` option"
-                                                  "is specified, will be used relative to aggregation directory")
+    parser.add_argument('-o', '--out_fname', help="Path to a file where aggregated JSON will be written.")
     return parser
 
 
-def main(args):
+def main():
     """Execute this script with arguments provided via command line interface"""
+    args = arg_parser().parse_args()
     agg_fns = None if args.agg_fns is None else \
         {key: agg_fns_from_names(fn_names if type(fn_names) is list else [fn_names])
          for key, fn_names in args.agg_fns.items()}
     default_agg_fns = None if args.default_agg_fns is None else \
         agg_fns_from_names(args.default_agg_fns)
-    agg_roots = [Path(d) for d in os.scandir(args.root) if d.is_dir()] if args.multidir else [Path(args.root)]
-    agg_root_results = [aggregate_json_values_by_key(agg_root, args.patterns, agg_fns, default_agg_fns)
-                        for agg_root in agg_roots]
-    for agg_root, results in zip(agg_roots, agg_root_results):
-        if results is not None:
-            if args.out_fname:
-                out_fname = (agg_root / args.out_fname) if args.multidir else args.out_fname
-                write_json(out_fname, results, indent=4, sort_keys=True)
-            else:
-                print(f"{agg_root.name}:\n\t" if args.multidir else "", f"{results}")
+    run_aggregate_json(root=args.root,
+                       patterns=args.patterns,
+                       agg_fns=agg_fns,
+                       default_agg_fns=default_agg_fns,
+                       out_fname=args.out_fname)
 
 
 if __name__ == '__main__':
-    main(arg_parser().parse_args())
+    main()
