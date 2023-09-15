@@ -103,7 +103,6 @@ def run_aggregate_json(root: str | Path,
                        agg_fns: dict[str, AGG_FNS] | None = None,
                        default_agg_fns: AGG_FNS | None = DEFAULT_AGG_FNS,
                        out_fname: str | Path | None = None):
-    root = Path(root)
     aggregated = aggregate_json_values_by_key(root, patterns, agg_fns, default_agg_fns)
     if aggregated is not None:
         if out_fname is not None:
