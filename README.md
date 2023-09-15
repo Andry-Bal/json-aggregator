@@ -30,12 +30,9 @@ options:
                         and their corresponding values are dropped and will
                         not appear in final aggregated JSON. (default:
                         ['list'])
-  -m, --multidir        Perform aggregation for each immediate subdirectory of
-                        the `root` (default: False)
   -o OUT_FNAME, --out_fname OUT_FNAME
-                        Path where aggregated JSON will be written. If
-                        `multidir` optionis specified, will be used relative
-                        to aggregation directory (default: None)
+                        Path to a file where aggregated JSON will be written.
+                        (default: None)
 
 Available aggregation functions: 'count', 'sum', 'list', 'mean', 'median',
 'mode', 'std', 'var', 'min', 'max', 'none'.
