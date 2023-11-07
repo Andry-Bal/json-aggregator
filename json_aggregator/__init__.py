@@ -1,2 +1,2 @@
-from json_aggregator.aggregate_json import update_agg_fns, aggregate_json_values_by_key
+from json_aggregator.aggregate_json import aggregate_and_output_json
 from json_aggregator.collect_json_to_csv import collect_json_to_csv

@@ -5,6 +5,10 @@ from pathlib import Path
 from typing import Any
 
 
+def identity(x):
+    return x
+
+
 def all_keys(dicts: Iterable[dict]) -> set:
     """Return a set of all the keys present in the given dictionaries."""
     return {k for d in dicts for k in d.keys()}
@@ -181,8 +185,7 @@ class KeyValueAction(argparse.Action):
             vals = vals.split(self.value_separator)
             if self.value_choices is not None:
                 self._validate_values(vals)
-            value = vals[0] if len(vals) == 1 else vals
-            items[key] = value
+            items[key] = vals
         else:
             key = values
             if self.key_choices is not None:

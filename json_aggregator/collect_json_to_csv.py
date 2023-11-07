@@ -68,9 +68,10 @@ def arg_parser():
     return parser
 
 
-def main(args):
+def main():
+    args = arg_parser().parse_args()
     collect_json_to_csv(args.root, args.patterns, args.out_fname, args.delimiter, args.restval)
 
 
 if __name__ == '__main__':
-    main(arg_parser().parse_args())
+    main()
