@@ -47,8 +47,8 @@ The following example adds a new aggregation function `unique` and overrides exi
 ```python
 from json_aggregator.aggregate_json import AGG_FN_CHOICES, run_from_cli
 
-agg_fn_choices = dict(AGG_FN_CHOICES)
 custom_agg_fns = {'unique': set, 'mean': lambda vals: sum(vals) / len(vals)}
+agg_fn_choices = dict(AGG_FN_CHOICES)
 agg_fn_choices.update(custom_agg_fns)
 
 run_from_cli(agg_fn_choices)
