@@ -35,22 +35,24 @@ options:
                         (default: None)
 
 Available aggregation functions: 'count', 'sum', 'list', 'mean', 'median',
-'mode', 'std', 'var', 'min', 'max', 'none'.
+'mode', 'std', 'var', 'min', 'max', 'drop'.
 ```
 
 ### Custom aggregation functions
 
-It is possible to extend/override currently available predefined aggregation functions.
+It is possible to extend/override predefined aggregation functions available in CLI.
 
 The following example adds a new aggregation function `unique` and overrides existing `mean` with custom implementation:
 
 ```python
-from json_aggregator.aggregate_json import arg_parser, main, update_agg_fns
+from json_aggregator.aggregate_json import AGG_FN_CHOICES, run_from_cli
 
-update_agg_fns({'unique': set, 
-                'mean': lambda vals: sum(vals) / len(vals)})
-args = arg_parser().parse_args()
-main(args)
+agg_fn_choices = dict(AGG_FN_CHOICES)
+custom_agg_fns = {'unique': set, 'mean': lambda vals: sum(vals) / len(vals)}
+agg_fn_choices.update(custom_agg_fns)
+
+run_from_cli(agg_fn_choices)
+
 ```
 
 
