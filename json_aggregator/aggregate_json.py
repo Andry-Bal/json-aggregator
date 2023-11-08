@@ -40,8 +40,8 @@ def agg_values_by_key(dicts: Iterable[dict],
         dicts (Iterable[dict]): Dictionaries to be aggregated.
         agg_fns (AggregationFunctionsByKey, optional): Dictionary that maps keys of
             given `dicts` to aggregation functions for their corresponding values.
-            If key value is None, the key and its corresponding values are dropped and
-            will not appear in final aggregated dictionary.
+            If key's value is None, both the key and its associated value will be
+            removed and will not be included in the final aggregated dictionary.
             If None, functions specified in `default_agg_fns` will be used for all keys.
             Defaults to None.
         default_agg_fns (AggregationFunctions, optional): Default aggregation
@@ -68,7 +68,7 @@ def agg_values_by_key(dicts: Iterable[dict],
         True
 
         >>> dicts = [{'a': 1, 'b': 2}, {'a': 3, 'b': 4, 'c': 5}, {'c': 6}]
-        >>> agg_values_by_key(dicts, default_agg_fns={'min':min, 'max': max}) == {'a': {'min': 1, 'max': 3},
+        >>> agg_values_by_key(dicts, default_agg_fns={'min': min, 'max': max}) == {'a': {'min': 1, 'max': 3},
         ...                                                                       'b': {'min': 2, 'max': 4},
         ...                                                                       'c': {'min': 5, 'max': 6}}
         True
